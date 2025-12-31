@@ -6,6 +6,7 @@ const config = require('./config');
 const swaggerSpec = require('./config/swagger');
 const routes = require('./routes');
 const { errorMiddleware, notFoundMiddleware } = require('./middlewares/errorMiddleware');
+const cronService = require('./services/cronService');
 
 // Initialize Express App
 const app = express();
@@ -83,11 +84,16 @@ app.listen(PORT, () => {
   console.log(`📡 API Base: http://localhost:${PORT}/api/v1`);
   console.log(`🏠 Houses Server: ${config.HOUSES_SERVER_URL}`);
   console.log('='.repeat(50));
+  
+  // Initialize Cron Jobs
+  cronService.initializeCronJobs();
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
+  // Stop cron jobs before exit
+  cronService.stopAllCronJobs();
   // Đóng server và thoát
   process.exit(1);
 });
@@ -95,7 +101,22 @@ process.on('unhandledRejection', (err) => {
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
+  // Stop cron jobs before exit
+  cronService.stopAllCronJobs();
   process.exit(1);
+});
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  cronService.stopAllCronJobs();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  cronService.stopAllCronJobs();
+  process.exit(0);
 });
 
 module.exports = app;

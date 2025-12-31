@@ -1,4 +1,6 @@
 const housesService = require('../services/housesService');
+const UserDeviceManagement = require('../models/UserDeviceManagement');
+const Device = require('../models/Device');
 
 /**
  * Control Controller
@@ -7,14 +9,16 @@ const housesService = require('../services/housesService');
  */
 
 /**
- * @route   POST /api/v1/control/device
+ * @route   POST /api/v1/control/device/:deviceId
  * @desc    Điều khiển thiết bị (Bật/Tắt máy bơm)
- * @body    { sensorId: "esp32-27" (optional), pump: "ON" }
+ * @params  deviceId
+ * @body    { pump: "ON" | "OFF" }
  * @access  Private
  */
 const controlDevice = async (req, res, next) => {
   try {
-    const { sensorId, pump } = req.body;
+    const { deviceId } = req.params;
+    const { pump } = req.body;
 
     // Validate input
     if (!pump) {
@@ -33,14 +37,29 @@ const controlDevice = async (req, res, next) => {
       });
     }
 
+    // Kiểm tra user có quyền truy cập device này không
+    const management = await UserDeviceManagement.findOne({
+      device: deviceId,
+      user: req.user._id
+    }).populate('device');
+
+    if (!management) {
+      return res.status(404).json({
+        success: false,
+        message: 'Device not found or you do not have access'
+      });
+    }
+
+    const device = management.device;
+
     // Gọi sang Houses_server để gửi lệnh
     const result = await housesService.sendDeviceCommand(
-      sensorId,
+      device.hardware_id,
       pump.toUpperCase()
     );
 
-    // Log hành động của user (optional - có thể lưu vào DB)
-    console.log(`User ${req.user.username} controlled pump: ${pump}`);
+    // Log hành động của user
+    console.log(`User ${req.user.username} controlled device ${device.hardware_id}, pump: ${pump}`);
 
     res.status(200).json({
       success: true,

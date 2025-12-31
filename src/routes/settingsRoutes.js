@@ -16,14 +16,18 @@ router.use(authMiddleware);
  * /settings:
  *   get:
  *     tags:
- *       - Settings
- *     summary: Lấy cấu hình người dùng
- *     description: Lấy cấu hình thông báo và ngưỡng cảnh báo của user
+ *       - Settings (Deprecated)
+ *     summary: Lấy cấu hình người dùng (DEPRECATED)
+ *     description: |
+ *       ⚠️ API này đã deprecated. Vui lòng sử dụng Device API thay thế:
+ *       - GET /api/v1/devices - Lấy danh sách devices
+ *       - GET /api/v1/devices/:deviceId - Lấy settings của device
+ *     deprecated: true
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
- *         description: Thành công
+ *       410:
+ *         description: Gone - Endpoint deprecated
  *         content:
  *           application/json:
  *             schema:
@@ -31,9 +35,10 @@ router.use(authMiddleware);
  *               properties:
  *                 success:
  *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/UserConfig'
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: This endpoint is deprecated
  */
 router.get('/', settingsController.getSettings);
 
@@ -42,9 +47,13 @@ router.get('/', settingsController.getSettings);
  * /settings:
  *   put:
  *     tags:
- *       - Settings
- *     summary: Cập nhật cấu hình người dùng
- *     description: Cập nhật cấu hình thông báo và ngưỡng cảnh báo
+ *       - Settings (Deprecated)
+ *     summary: Cập nhật cấu hình người dùng (DEPRECATED)
+ *     description: |
+ *       ⚠️ API này đã deprecated. Vui lòng sử dụng:
+ *       - POST /api/v1/devices - Tạo device mới
+ *       - PUT /api/v1/devices/:deviceId/settings - Cập nhật settings
+ *     deprecated: true
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,43 +62,9 @@ router.get('/', settingsController.getSettings);
  *         application/json:
  *           schema:
  *             type: object
- *             properties:
- *               sensor_id:
- *                 type: string
- *                 example: esp32-27
- *               notifications:
- *                 type: object
- *                 properties:
- *                   email_alert:
- *                     type: boolean
- *                     example: true
- *                   push_alert:
- *                     type: boolean
- *                     example: false
- *               thresholds:
- *                 type: object
- *                 properties:
- *                   max_temp:
- *                     type: number
- *                     example: 35
- *                   min_temp:
- *                     type: number
- *                     example: 15
- *                   min_humidity:
- *                     type: number
- *                     example: 40
- *                   max_humidity:
- *                     type: number
- *                     example: 80
- *                   min_soil_moisture:
- *                     type: number
- *                     example: 20
- *                   min_light:
- *                     type: number
- *                     example: 200
  *     responses:
- *       200:
- *         description: Cập nhật thành công
+ *       410:
+ *         description: Gone - Endpoint deprecated
  *         content:
  *           application/json:
  *             schema:
@@ -97,56 +72,12 @@ router.get('/', settingsController.getSettings);
  *               properties:
  *                 success:
  *                   type: boolean
- *                   example: true
+ *                   example: false
  *                 message:
  *                   type: string
- *                   example: Settings updated successfully
- *                 data:
- *                   $ref: '#/components/schemas/UserConfig'
+ *                   example: This endpoint is deprecated
  */
-router.put(
-  '/',
-  [
-    body('sensor_id')
-      .optional()
-      .trim()
-      .notEmpty()
-      .withMessage('sensor_id cannot be empty'),
-    body('notifications.email_alert')
-      .optional()
-      .isBoolean()
-      .withMessage('email_alert must be boolean'),
-    body('notifications.push_alert')
-      .optional()
-      .isBoolean()
-      .withMessage('push_alert must be boolean'),
-    body('thresholds.max_temp')
-      .optional()
-      .isNumeric()
-      .withMessage('max_temp must be a number'),
-    body('thresholds.min_temp')
-      .optional()
-      .isNumeric()
-      .withMessage('min_temp must be a number'),
-    body('thresholds.min_humidity')
-      .optional()
-      .isNumeric()
-      .withMessage('min_humidity must be a number'),
-    body('thresholds.max_humidity')
-      .optional()
-      .isNumeric()
-      .withMessage('max_humidity must be a number'),
-    body('thresholds.min_soil_moisture')
-      .optional()
-      .isNumeric()
-      .withMessage('min_soil_moisture must be a number'),
-    body('thresholds.min_light')
-      .optional()
-      .isNumeric()
-      .withMessage('min_light must be a number'),
-    validateRequest,
-  ],
-  settingsController.updateSettings
-);
+// PUT endpoint - Deprecated, không cần validation nữa
+router.put('/', settingsController.updateSettings);
 
 module.exports = router;

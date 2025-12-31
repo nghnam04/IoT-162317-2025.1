@@ -11,21 +11,21 @@ router.use(authMiddleware);
 
 /**
  * @swagger
- * /monitor/current:
+ * /monitor/{deviceId}/current:
  *   get:
  *     tags:
  *       - Monitoring
- *     summary: Lấy dữ liệu cảm biến hiện tại
+ *     summary: Lấy dữ liệu cảm biến hiện tại của device
  *     description: Lấy dữ liệu real-time từ các cảm biến (nhiệt độ, độ ẩm, ánh sáng, độ ẩm đất)
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: sensorId
+ *       - in: path
+ *         name: deviceId
+ *         required: true
  *         schema:
  *           type: string
- *         description: ID của sensor (optional, default esp32-27)
- *         example: esp32-27
+ *         description: ID của device
  *     responses:
  *       200:
  *         description: Thành công
@@ -49,25 +49,25 @@ router.use(authMiddleware);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/current', monitorController.getCurrentData);
+router.get('/:deviceId/current', monitorController.getCurrentData);
 
 /**
  * @swagger
- * /monitor/history:
+ * /monitor/{deviceId}/history:
  *   get:
  *     tags:
  *       - Monitoring
- *     summary: Lấy lịch sử dữ liệu cảm biến
+ *     summary: Lấy lịch sử dữ liệu cảm biến của device
  *     description: Lấy dữ liệu lịch sử để vẽ biểu đồ (max 100 records)
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: sensorId
+ *       - in: path
+ *         name: deviceId
+ *         required: true
  *         schema:
  *           type: string
- *         description: ID của sensor (optional, default esp32-27)
- *         example: esp32-27
+ *         description: ID của device
  *       - in: query
  *         name: from
  *         required: true
@@ -106,6 +106,6 @@ router.get('/current', monitorController.getCurrentData);
  *       503:
  *         description: Houses Server không khả dụng
  */
-router.get('/history', monitorController.getHistoryData);
+router.get('/:deviceId/history', monitorController.getHistoryData);
 
 module.exports = router;

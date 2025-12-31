@@ -13,14 +13,21 @@ router.use(authMiddleware);
 
 /**
  * @swagger
- * /control/device:
+ * /control/device/{deviceId}:
  *   post:
  *     tags:
  *       - Control
  *     summary: Điều khiển thiết bị
- *     description: Bật/Tắt máy bơm
+ *     description: Bật/Tắt máy bơm của device
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: deviceId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của device
  *     requestBody:
  *       required: true
  *       content:
@@ -30,10 +37,6 @@ router.use(authMiddleware);
  *             required:
  *               - pump
  *             properties:
- *               sensorId:
- *                 type: string
- *                 description: ID của sensor (optional, mặc định esp32-27)
- *                 example: esp32-27
  *               pump:
  *                 type: string
  *                 description: Trạng thái bơm
@@ -65,13 +68,8 @@ router.use(authMiddleware);
  *         description: Houses Server không khả dụng
  */
 router.post(
-  '/device',
+  '/device/:deviceId',
   [
-    body('sensorId')
-      .optional()
-      .trim()
-      .notEmpty()
-      .withMessage('sensorId cannot be empty'),
     body('pump')
       .trim()
       .notEmpty()

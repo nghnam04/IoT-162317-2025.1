@@ -22,5 +22,3 @@ Thumbs.db
 # Build
 dist/
 build/
-
-DEPLOY_GUIDE.md

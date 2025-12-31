@@ -6,8 +6,8 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'IoT UI Backend API',
-      version: '1.0.0',
-      description: 'API documentation cho hệ thống IoT - UI Backend Service',
+      version: '2.0.0',
+      description: 'API documentation cho hệ thống IoT - UI Backend Service với Device Management & Alert System',
       contact: {
         name: 'API Support',
         email: 'support@iot.com',
@@ -63,27 +63,101 @@ const options = {
             },
           },
         },
-        UserConfig: {
+        Device: {
           type: 'object',
           properties: {
-            sensor_id: {
+            _id: {
+              type: 'string',
+              example: '65a1b2c3d4e5f6g7h8i9j0k1',
+            },
+            hardware_id: {
               type: 'string',
               example: 'esp32-27',
+            },
+            name: {
+              type: 'string',
+              example: 'Smart Garden Device',
+            },
+            type: {
+              type: 'string',
+              example: 'Sensor',
+            },
+            automation_configs: {
+              type: 'object',
+              properties: {
+                auto_pump: {
+                  type: 'object',
+                  properties: {
+                    enabled: {
+                      type: 'boolean',
+                      example: true,
+                    },
+                    threshold_moisture: {
+                      type: 'number',
+                      example: 40,
+                    },
+                    duration_seconds: {
+                      type: 'number',
+                      example: 30,
+                    },
+                    schedules: {
+                      type: 'array',
+                      items: {
+                        type: 'object'
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+            },
+          },
+        },
+        UserDeviceManagement: {
+          type: 'object',
+          properties: {
+            _id: {
+              type: 'string',
+              example: '65a1b2c3d4e5f6g7h8i9j0k2',
+            },
+            user: {
+              type: 'string',
+              example: '507f1f77bcf86cd799439011',
+            },
+            device: {
+              type: 'string',
+              example: '65a1b2c3d4e5f6g7h8i9j0k1',
+            },
+            role: {
+              type: 'string',
+              enum: ['owner', 'member'],
+              example: 'owner',
+            },
+            alias_name: {
+              type: 'string',
+              example: 'Vườn rau nhà tôi',
             },
             notifications: {
               type: 'object',
               properties: {
-                email_alert: {
+                enable_email: {
                   type: 'boolean',
                   example: true,
                 },
-                push_alert: {
+                enable_push: {
                   type: 'boolean',
                   example: false,
                 },
               },
             },
-            thresholds: {
+            alert_settings: {
               type: 'object',
               properties: {
                 max_temp: {
@@ -112,7 +186,11 @@ const options = {
                 },
               },
             },
-            updated_at: {
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+            },
+            updatedAt: {
               type: 'string',
               format: 'date-time',
             },
@@ -129,40 +207,35 @@ const options = {
               type: 'string',
               example: 'esp32-27',
             },
-            temperature: {
+            temp: {
               type: 'number',
-              example: 23.1,
+              example: 28.5,
               description: 'Nhiệt độ (°C)',
             },
             humidity: {
               type: 'number',
-              example: 77.8,
-              description: 'Độ ẩm (%)',
+              example: 65,
+              description: 'Độ ẩm không khí (%)',
             },
             soil_moisture: {
               type: 'number',
-              example: 0,
+              example: 45,
               description: 'Độ ẩm đất (%)',
             },
-            light_level: {
+            light: {
               type: 'number',
-              example: 46,
-              description: 'Cường độ ánh sáng',
+              example: 450,
+              description: 'Cường độ ánh sáng (lux)',
             },
-            status: {
+            pump_status: {
               type: 'string',
-              example: 'ONLINE',
-              description: 'Trạng thái thiết bị',
-            },
-            pump_state: {
-              type: 'string',
-              example: 'ON',
+              example: 'OFF',
               description: 'Trạng thái bơm',
             },
             timestamp: {
               type: 'string',
               format: 'date-time',
-              example: '2025-12-29T11:26:28.936Z',
+              example: '2025-12-31T15:30:00.000Z',
             },
           },
         },

@@ -1,34 +1,27 @@
-const UserConfig = require('../models/UserConfig');
-
 /**
  * Settings Controller
- * Xử lý các request liên quan đến cấu hình người dùng
+ * DEPRECATED: API này đã bị thay thế bởi /api/v1/devices/:deviceId/settings
+ * Giữ lại để backward compatibility với client cũ
  */
 
 /**
  * @route   GET /api/v1/settings
- * @desc    Lấy cấu hình của user hiện tại
+ * @desc    Lấy cấu hình của user hiện tại (DEPRECATED)
  * @access  Private
+ * @deprecated Use /api/v1/devices/:deviceId/settings instead
  */
 const getSettings = async (req, res, next) => {
   try {
-    let config = await UserConfig.findOne({ user_id: req.user._id });
-
-    // Nếu chưa có config, tạo config mặc định
-    if (!config) {
-      config = await UserConfig.create({
-        user_id: req.user._id,
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: {
-        sensor_id: config.sensor_id,
-        notifications: config.notifications,
-        thresholds: config.thresholds,
-        updated_at: config.updated_at,
+    // API này đã deprecated - hướng dẫn user sử dụng API mới
+    res.status(410).json({
+      success: false,
+      message: 'This endpoint is deprecated. Please use /api/v1/devices API instead.',
+      migration: {
+        step1: 'GET /api/v1/devices - Get list of your devices',
+        step2: 'GET /api/v1/devices/:deviceId - Get device details with settings',
+        step3: 'PUT /api/v1/devices/:deviceId/settings - Update device settings'
       },
+      documentation: 'See API_DOCUMENTATION_V2.md for details'
     });
   } catch (error) {
     next(error);
@@ -37,47 +30,37 @@ const getSettings = async (req, res, next) => {
 
 /**
  * @route   PUT /api/v1/settings
- * @desc    Cập nhật cấu hình của user
+ * @desc    Cập nhật cấu hình của user (DEPRECATED)
  * @body    { sensor_id, notifications: {...}, thresholds: {...} }
  * @access  Private
+ * @deprecated Use /api/v1/devices/:deviceId/settings instead
  */
 const updateSettings = async (req, res, next) => {
   try {
-    const { sensor_id, notifications, thresholds } = req.body;
-
-    let config = await UserConfig.findOne({ user_id: req.user._id });
-
-    if (!config) {
-      // Tạo mới nếu chưa có
-      config = await UserConfig.create({
-        user_id: req.user._id,
-        sensor_id,
-        notifications,
-        thresholds,
-      });
-    } else {
-      // Cập nhật
-      if (sensor_id) {
-        config.sensor_id = sensor_id;
-      }
-      if (notifications) {
-        config.notifications = { ...config.notifications, ...notifications };
-      }
-      if (thresholds) {
-        config.thresholds = { ...config.thresholds, ...thresholds };
-      }
-      await config.save();
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Settings updated successfully',
-      data: {
-        sensor_id: config.sensor_id,
-        notifications: config.notifications,
-        thresholds: config.thresholds,
-        updated_at: config.updated_at,
+    // API này đã deprecated - hướng dẫn user sử dụng API mới
+    res.status(410).json({
+      success: false,
+      message: 'This endpoint is deprecated. Please use /api/v1/devices API instead.',
+      migration: {
+        step1: 'POST /api/v1/devices - Create device with hardware_id',
+        step2: 'PUT /api/v1/devices/:deviceId/settings - Update settings (notifications, alert_settings)',
+        example: {
+          url: 'PUT /api/v1/devices/:deviceId/settings',
+          body: {
+            alias_name: 'My Garden',
+            notifications: {
+              enable_email: true,
+              enable_push: false
+            },
+            alert_settings: {
+              max_temp: 35,
+              min_temp: 15,
+              min_soil_moisture: 20
+            }
+          }
+        }
       },
+      documentation: 'See API_DOCUMENTATION_V2.md for details'
     });
   } catch (error) {
     next(error);

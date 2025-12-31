@@ -3,6 +3,7 @@ const authRoutes = require('./authRoutes');
 const monitorRoutes = require('./monitorRoutes');
 const controlRoutes = require('./controlRoutes');
 const settingsRoutes = require('./settingsRoutes');
+const deviceRoutes = require('./deviceRoutes');
 
 const router = express.Router();
 
@@ -14,13 +15,16 @@ const router = express.Router();
 // Authentication routes
 router.use('/auth', authRoutes);
 
+// Device management routes
+router.use('/devices', deviceRoutes);
+
 // Monitoring routes (Proxy đến Houses_server)
 router.use('/monitor', monitorRoutes);
 
 // Control routes (Proxy đến Houses_server)
 router.use('/control', controlRoutes);
 
-// Settings routes
+// Settings routes (Deprecated - use /devices/:deviceId/settings instead)
 router.use('/settings', settingsRoutes);
 
 // Health check endpoint

@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const User = require('../models/User');
-const UserConfig = require('../models/UserConfig');
 
 /**
  * Auth Service
@@ -51,10 +50,8 @@ const registerUser = async (userData) => {
       full_name,
     });
 
-    // Tạo config mặc định cho user
-    await UserConfig.create({
-      user_id: user._id,
-    });
+    // Note: UserConfig đã bị xóa - Sử dụng UserDeviceManagement thay thế
+    // User sẽ tạo device và settings thông qua /api/v1/devices
 
     // Tạo token
     const token = generateToken(user._id);
