@@ -1,0 +1,17 @@
+# GET http://localhost:5000/api/device/status/?sensorId=esp32-27
+
+# POST http://34.44.49.190:30050/api/command/
+# Content-Type: application/json
+
+# {
+#   "deviceId": "esp32-27",
+#   "pump": "OFF"
+# }
+
+POST http://localhost:5000/api/command/
+Content-Type: application/json
+
+{
+  "sensorId": "test",
+  "pump": "ON"
+}
