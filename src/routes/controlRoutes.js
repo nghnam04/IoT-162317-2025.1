@@ -18,7 +18,12 @@ router.use(authMiddleware);
  *     tags:
  *       - Control
  *     summary: Điều khiển thiết bị
- *     description: Bật/Tắt máy bơm của device
+ *     description: |
+ *       Bật/Tắt/Auto máy bơm của device.
+ *       
+ *       **AUTO Mode:** ESP32 và Houses_server sẽ tự động kiểm tra độ ẩm đất và điều khiển bơm dỳa trên ngưỡng đã cấu hình tại ESP32.
+ *       
+ *       Sử dụng API `/monitor/device/{id}/current` để lấy trạng thái pump thực tế từ Houses_server.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -39,9 +44,13 @@ router.use(authMiddleware);
  *             properties:
  *               pump:
  *                 type: string
- *                 description: Trạng thái bơm
- *                 enum: [ON, OFF]
- *                 example: ON
+ *                 description: |
+ *                   Trạng thái bơm:
+ *                   - ON: Bật thủ công
+ *                   - OFF: Tắt
+ *                   - AUTO: ESP32 tự động kiểm soát dựa trên ngưỡng độ ẩm
+ *                 enum: [ON, OFF, AUTO]
+ *                 example: AUTO
  *     responses:
  *       200:
  *         description: Lệnh điều khiển thành công
@@ -55,13 +64,19 @@ router.use(authMiddleware);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Pump is being turned ON
+ *                   example: Auto pump mode activated. ESP32 will automatically control pump based on soil moisture threshold.
  *                 data:
  *                   type: object
  *                   properties:
- *                     message:
+ *                     pump_mode:
  *                       type: string
- *                       example: Command sent successfully
+ *                       example: AUTO
+ *                     houses_response:
+ *                       type: object
+ *                       properties:
+ *                         message:
+ *                           type: string
+ *                           example: Command sent successfully
  *       400:
  *         description: Dữ liệu không hợp lệ
  *       503:
@@ -74,8 +89,8 @@ router.post(
       .trim()
       .notEmpty()
       .withMessage('pump is required')
-      .isIn(['ON', 'OFF', 'on', 'off'])
-      .withMessage('pump must be ON or OFF'),
+      .isIn(['ON', 'OFF', 'AUTO', 'on', 'off', 'auto'])
+      .withMessage('pump must be ON, OFF, or AUTO'),
     validateRequest,
   ],
   controlController.controlDevice

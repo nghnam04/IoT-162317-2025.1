@@ -13,7 +13,7 @@ const UserDeviceManagement = require('../models/UserDeviceManagement');
  * @returns {Object} Device và UserDeviceManagement record
  */
 const createDevice = async (deviceData, ownerId) => {
-  const { hardware_id, name, type, automation_configs } = deviceData;
+  const { hardware_id, name, type } = deviceData;
 
   // Kiểm tra xem hardware_id đã tồn tại chưa
   const existingDevice = await Device.findOne({ hardware_id });
@@ -28,8 +28,7 @@ const createDevice = async (deviceData, ownerId) => {
   const device = await Device.create({
     hardware_id,
     name: name || 'Smart Garden Device',
-    type: type || 'Sensor',
-    automation_configs: automation_configs || {}
+    type: type || 'Sensor'
   });
 
   // Tạo record UserDeviceManagement với role owner
@@ -97,38 +96,6 @@ const getDeviceDetail = async (deviceId, userId) => {
       last_alert_sent: management.last_alert_sent
     }
   };
-};
-
-/**
- * Cập nhật automation configs (chỉ owner)
- * @param {String} deviceId - ID của device
- * @param {String} userId - ID của user
- * @param {Object} automationConfigs - Cấu hình tự động mới
- * @returns {Object} Updated device
- */
-const updateAutomationConfigs = async (deviceId, userId, automationConfigs) => {
-  // Kiểm tra user có phải owner không
-  const management = await UserDeviceManagement.findOne({
-    device: deviceId,
-    user: userId,
-    role: 'owner'
-  });
-
-  if (!management) {
-    throw {
-      statusCode: 403,
-      message: 'Only owner can update automation configs'
-    };
-  }
-
-  // Cập nhật configs
-  const device = await Device.findByIdAndUpdate(
-    deviceId,
-    { automation_configs: automationConfigs },
-    { new: true, runValidators: true }
-  );
-
-  return device;
 };
 
 /**
@@ -322,7 +289,6 @@ module.exports = {
   createDevice,
   getUserDevices,
   getDeviceDetail,
-  updateAutomationConfigs,
   shareDevice,
   removeUserFromDevice,
   getDeviceUsers,

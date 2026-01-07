@@ -71,35 +71,6 @@ router.get('/:deviceId', deviceController.getDeviceDetail);
 
 /**
  * @swagger
- * /devices/{deviceId}/automation:
- *   put:
- *     summary: Cập nhật automation configs (Owner only)
- *     tags: [Devices]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: deviceId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               automation_configs:
- *                 type: object
- *     responses:
- *       200:
- *         description: Success
- */
-router.put('/:deviceId/automation', deviceController.updateAutomationConfigs);
-
-/**
- * @swagger
  * /devices/{deviceId}/share:
  *   post:
  *     summary: Share device với user khác (Owner only)

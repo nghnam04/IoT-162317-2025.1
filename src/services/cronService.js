@@ -53,12 +53,6 @@ const isAlertMonitoringRunning = () => {
 const initializeCronJobs = () => {
   console.log('🚀 Initializing cron jobs...');
   startAlertMonitoring();
-  
-  // TODO: Có thể thêm các cron jobs khác ở đây
-  // Ví dụ:
-  // - Auto pump scheduling
-  // - Data cleanup
-  // - Report generation
 };
 
 /**

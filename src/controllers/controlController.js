@@ -10,9 +10,9 @@ const Device = require('../models/Device');
 
 /**
  * @route   POST /api/v1/control/device/:deviceId
- * @desc    Điều khiển thiết bị (Bật/Tắt máy bơm)
+ * @desc    Điều khiển thiết bị (Bật/Tắt/Auto máy bơm)
  * @params  deviceId
- * @body    { pump: "ON" | "OFF" }
+ * @body    { pump: "ON" | "OFF" | "AUTO" }
  * @access  Private
  */
 const controlDevice = async (req, res, next) => {
@@ -28,12 +28,12 @@ const controlDevice = async (req, res, next) => {
       });
     }
 
-    // Validate pump state
-    const validStates = ['ON', 'OFF'];
+    // Validate pump state - Bây giờ hỗ trợ AUTO
+    const validStates = ['ON', 'OFF', 'AUTO'];
     if (!validStates.includes(pump.toUpperCase())) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid pump state. Must be ON or OFF',
+        message: 'Invalid pump state. Must be ON, OFF, or AUTO',
       });
     }
 
@@ -51,20 +51,36 @@ const controlDevice = async (req, res, next) => {
     }
 
     const device = management.device;
+    const pumpState = pump.toUpperCase();
+
+    // Cập nhật pump_mode trong database
+    device.pump_mode = pumpState;
+    await device.save();
 
     // Gọi sang Houses_server để gửi lệnh
     const result = await housesService.sendDeviceCommand(
       device.hardware_id,
-      pump.toUpperCase()
+      pumpState
     );
 
     // Log hành động của user
-    console.log(`User ${req.user.username} controlled device ${device.hardware_id}, pump: ${pump}`);
+    console.log(`User ${req.user.username} controlled device ${device.hardware_id}, pump: ${pumpState}`);
+
+    // Message khác nhau cho từng mode
+    let message;
+    if (pumpState === 'AUTO') {
+      message = 'Auto pump mode activated. ESP32 will automatically control pump based on soil moisture threshold.';
+    } else {
+      message = `Pump is being turned ${pumpState}`;
+    }
 
     res.status(200).json({
       success: true,
-      message: `Pump is being turned ${pump}`,
-      data: result.data,
+      message: message,
+      data: {
+        pump_mode: pumpState,
+        houses_response: result.data
+      },
     });
   } catch (error) {
     res.status(error.statusCode || 503).json({

@@ -6,8 +6,7 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'IoT UI Backend API',
-      version: '2.0.0',
-      description: 'API documentation cho hệ thống IoT - UI Backend Service với Device Management & Alert System',
+      version: '2.1.0',
       contact: {
         name: 'API Support',
         email: 'support@iot.com',
@@ -82,33 +81,11 @@ const options = {
               type: 'string',
               example: 'Sensor',
             },
-            automation_configs: {
-              type: 'object',
-              properties: {
-                auto_pump: {
-                  type: 'object',
-                  properties: {
-                    enabled: {
-                      type: 'boolean',
-                      example: true,
-                    },
-                    threshold_moisture: {
-                      type: 'number',
-                      example: 40,
-                    },
-                    duration_seconds: {
-                      type: 'number',
-                      example: 30,
-                    },
-                    schedules: {
-                      type: 'array',
-                      items: {
-                        type: 'object'
-                      }
-                    }
-                  }
-                }
-              }
+            pump_mode: {
+              type: 'string',
+              enum: ['ON', 'OFF', 'AUTO'],
+              example: 'OFF',
+              description: 'Trạng thái pump hiện tại. AUTO = ESP32 tự kiểm soát dựa trên ngưỡng độ ẩm',
             },
             createdAt: {
               type: 'string',

@@ -8,12 +8,12 @@ const deviceService = require('../services/deviceService');
 /**
  * @route   POST /api/v1/devices
  * @desc    Tạo device mới và register user làm owner
- * @body    { hardware_id, name?, type?, automation_configs? }
+ * @body    { hardware_id, name?, type? }
  * @access  Private
  */
 const createDevice = async (req, res, next) => {
   try {
-    const { hardware_id, name, type, automation_configs } = req.body;
+    const { hardware_id, name, type } = req.body;
 
     if (!hardware_id) {
       return res.status(400).json({
@@ -23,7 +23,7 @@ const createDevice = async (req, res, next) => {
     }
 
     const result = await deviceService.createDevice(
-      { hardware_id, name, type, automation_configs },
+      { hardware_id, name, type },
       req.user._id
     );
 
@@ -84,43 +84,6 @@ const getDeviceDetail = async (req, res, next) => {
     res.status(error.statusCode || 500).json({
       success: false,
       message: error.message || 'Failed to get device detail'
-    });
-  }
-};
-
-/**
- * @route   PUT /api/v1/devices/:deviceId/automation
- * @desc    Cập nhật automation configs (chỉ owner)
- * @body    { automation_configs }
- * @access  Private (Owner only)
- */
-const updateAutomationConfigs = async (req, res, next) => {
-  try {
-    const { deviceId } = req.params;
-    const { automation_configs } = req.body;
-
-    if (!automation_configs) {
-      return res.status(400).json({
-        success: false,
-        message: 'automation_configs is required'
-      });
-    }
-
-    const device = await deviceService.updateAutomationConfigs(
-      deviceId,
-      req.user._id,
-      automation_configs
-    );
-
-    res.status(200).json({
-      success: true,
-      message: 'Automation configs updated successfully',
-      data: device
-    });
-  } catch (error) {
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || 'Failed to update automation configs'
     });
   }
 };
@@ -275,7 +238,6 @@ module.exports = {
   createDevice,
   getUserDevices,
   getDeviceDetail,
-  updateAutomationConfigs,
   shareDevice,
   removeUserFromDevice,
   getDeviceUsers,

@@ -1,11 +1,112 @@
-# Tóm tắt các thay đổi trong hệ thống v2.0
+# Tóm tắt các thay đổi trong hệ thống v2.0 và v2.1
 
 ## 📋 Tổng quan
-Đã thực hiện các thay đổi lớn để nâng cấp hệ thống từ single-device sang multi-device với device sharing và alert monitoring tự động.
+- **v2.0**: Nâng cấp từ single-device sang multi-device với device sharing và alert monitoring
+- **v2.1**: Đơn giản hóa hệ thống bơm tự động với trạng thái AUTO
 
 ---
 
-## 🗄️ Database Schema Changes
+## 🚀 v2.1 - Auto Pump Simplification (Latest)
+
+### Thay đổi chính
+Đơn giản hóa hệ thống bơm tự động, thay thế `automation_configs` phức tạp bằng cách tiếp cận đơn giản hơn với **3 trạng thái pump: ON, OFF, AUTO**
+
+### 🗄️ Schema Changes
+
+#### **Device.js**
+**Đã xóa:**
+```javascript
+automation_configs: {
+  auto_pump: {
+    enabled: Boolean,
+    threshold_moisture: Number,
+    duration_seconds: Number,
+    schedules: [...]
+  }
+}
+```
+
+**Thêm mới:**
+```javascript
+pump_mode: {
+  type: String,
+  enum: ['ON', 'OFF', 'AUTO'],
+  default: 'OFF'
+},
+auto_pump_config: {
+  enabled: Boolean,
+  threshold_moisture: Number (0-100),
+  last_checked_at: Date
+}
+```
+
+### 🔧 Backend Changes
+
+#### Services Mới
+- **autoPumpService.js** - Service tự động kiểm tra và tắt bơm
+  - `checkAndControlAutoPumps()` - Kiểm tra tất cả devices ở chế độ AUTO
+  - Tự động tắt pump khi độ ẩm đất >= threshold
+
+#### Services Cập nhật
+- **cronService.js**
+  - Thêm `startAutoPumpMonitoring()` - Cron job chạy mỗi 2 phút
+  - Thêm `stopAutoPumpMonitoring()`
+  - Thêm `isAutoPumpMonitoringRunning()`
+
+- **deviceService.js**
+  - Xóa `updateAutomationConfigs()`
+  - Thêm `updateAutoPumpConfig()` - Cập nhật enabled và threshold_moisture
+
+#### Controllers Cập nhật
+- **controlController.js**
+  - Hỗ trợ pump: "AUTO" (ngoài ON và OFF)
+  - Lưu pump_mode vào database
+  - Thông báo threshold khi bật AUTO mode
+
+- **deviceController.js**
+  - Xóa `updateAutomationConfigs()`
+  - Thêm `updateAutoPumpConfig()` - API đơn giản hơn
+
+#### Routes Cập nhật
+- **deviceRoutes.js**
+  - Thay đổi: `PUT /devices/:deviceId/automation` 
+  - Thành: `PUT /devices/:deviceId/auto-pump`
+
+### 📡 API Changes
+
+#### Điều khiển pump (đã cập nhật)
+```http
+POST /api/v1/control/device/:deviceId
+{ "pump": "AUTO" }  // Mới hỗ trợ AUTO
+```
+
+#### Cấu hình auto pump (API mới)
+```http
+PUT /api/v1/devices/:deviceId/auto-pump
+{
+  "enabled": true,
+  "threshold_moisture": 45
+}
+```
+
+### 🎯 Cách hoạt động mới
+
+1. User bật pump AUTO → `pump_mode = "AUTO"`
+2. Cron job chạy mỗi 2 phút
+3. Kiểm tra độ ẩm đất từ Houses_server
+4. Nếu `soil_moisture >= threshold_moisture`:
+   - Gửi lệnh OFF đến Houses_server
+   - Cập nhật `pump_mode = "OFF"`
+
+### ✨ Ưu điểm
+- ✅ Đơn giản hóa API và schema
+- ✅ Không cần lịch trình phức tạp
+- ✅ Tự động tắt dựa trên ngưỡng độ ẩm
+- ✅ Phù hợp với cách hoạt động của Houses_server
+
+---
+
+## 🗄️ Database Schema Changes (v2.0)
 
 ### ✅ Models Mới
 
